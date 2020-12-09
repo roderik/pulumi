@@ -2,12 +2,57 @@ CHANGELOG
 =========
 
 ## HEAD (Unreleased)
+_(none)_
+
+## 2.15.4 (2020-12-08)
+
+- Fix a problem where `pulumi import` could panic on an import error due to missing error message.
+  [#5884](https://github.com/pulumi/pulumi/pull/5884)
+- Correct the system name detected for Jenkins CI. [#5891](https://github.com/pulumi/pulumi/pull/5891)
+
+- Fix python execution for users running Python installed through the Windows App Store
+  on Windows 10 [#5874](https://github.com/pulumi/pulumi/pull/5874)
+
+## 2.15.3 (2020-12-07)
+
+- Fix errors when running `pulumi` in Windows-based CI environments.
+  [#5879](https://github.com/pulumi/pulumi/issues/5879)
+
+## 2.15.2 (2020-12-07)
+
+- Fix a problem where `pulumi import` could panic on importing arrays and sets, due to
+  incorrect array resizing logic. [#5872](https://github.com/pulumi/pulumi/pull/5872).
+
+## 2.15.1 (2020-12-04)
+
+- Address potential issues when running multiple `pulumi` processes concurrently.
+  [#5857](https://github.com/pulumi/pulumi/pull/5857)
+
+- Automatically install missing Python dependencies.
+  [#5787](https://github.com/pulumi/pulumi/pull/5787)
+
+- [cli] Ensure `pulumi stack change-secrets-provider` allows rotating the key for a passphrase provider
+  [#5865](https://github.com/pulumi/pulumi/pull/5865/)
+
+## 2.15.0 (2020-12-02)
+
+- [sdk/python] Add deserialization support for enums.
+  [#5615](https://github.com/pulumi/pulumi/pull/5615)
+
+- Correctly rename `Pulumi.*.yaml` stack files during a rename that includes an
+  organization in its name [#5812](https://github.com/pulumi/pulumi/pull/5812).
 
 - Respect `PULUMI_PYTHON_CMD` in scripts.
   [#5782](https://github.com/pulumi/pulumi/pull/5782)
 
 - Add `PULUMI_BACKEND_URL` environment variable to configure the state backend.
   [#5789](https://github.com/pulumi/pulumi/pull/5789)
+
+- [sdk/dotnet] Add support for dependency injection into TStack instance by adding an overload to `Deployment.RunAsync`. The overload accepts an `IServiceProvider` that is used to create the instance of TStack. Also added a new method `Deployment.TestWithServiceProviderAsync` for testing stacks that use dependency injection.
+  [#5723](https://github.com/pulumi/pulumi/pull/5723/)
+
+- [cli] Ensure `pulumi stack change-secrets-provider` allows rotating the key in Azure KeyVault
+  [#5842](https://github.com/pulumi/pulumi/pull/5842/)
 
 ## 2.14.0 (2020-11-18)
 

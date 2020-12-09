@@ -316,9 +316,7 @@ func TestResourceNestedPropertyPythonCasing(t *testing.T) {
 			}
 		})
 
-		// Unique nested properties are those that only appear inside a nested object and therefore
-		// are never mapped to their snake_case. Therefore, such properties must be rendered with a
-		// camelCase.
+		// Unique nested properties are those that only appear inside a nested object and should also be snake_cased.
 		t.Run("UniqueNestedProperties", func(t *testing.T) {
 			n := nestedTypes[1]
 			assert.Equal(t, "Resource<wbr>Options2", n.Name, "got %v instead of Resource<wbr>Options2", n.Name)
@@ -332,8 +330,9 @@ func TestResourceNestedPropertyPythonCasing(t *testing.T) {
 
 			for name := range nestedObject.Properties {
 				found := false
+				pyName := python.PyName(name)
 				for _, prop := range pyProps {
-					if prop.Name == name {
+					if prop.Name == pyName {
 						found = true
 						break
 					}
@@ -378,7 +377,7 @@ func TestResourceDocHeader(t *testing.T) {
 			Name:             "ModuleLevelResourceHeader",
 			ResourceName:     "Resource",
 			ModuleName:       "module",
-			ExpectedTitleTag: "Resource Resource | Module module | Package prov",
+			ExpectedTitleTag: "prov.module.Resource",
 		},
 	}
 

@@ -83,6 +83,7 @@ class Server implements grpc.UntypedServiceImplementation {
     public configure(call: any, callback: any): void {
         const resp = new provproto.ConfigureResponse();
         resp.setAcceptsecrets(true);
+        resp.setAcceptresources(true);
         callback(undefined, resp);
     }
 
@@ -278,8 +279,6 @@ class Server implements grpc.UntypedServiceImplementation {
             const deserializedInputs = runtime.deserializeProperties(req.getInputs());
             for (const k of Object.keys(deserializedInputs)) {
                 const inputDeps = inputDependencies.get(k);
-                console.log(`${k}: ${inputDeps ? JSON.stringify(inputDeps.getUrnsList()) : []}`);
-
                 const deps = (inputDeps ? <resource.URN[]>inputDeps.getUrnsList() : [])
                     .map(depUrn => new resource.DependencyResource(depUrn));
                 const input = deserializedInputs[k];
