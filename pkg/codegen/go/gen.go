@@ -196,11 +196,11 @@ func (pkg *pkgContext) tokenToResource(tok string) string {
 
 	name = Title(name)
 
-	if mod == "" {
-		mod = components[0]
-	}
 	if mod == pkg.mod {
 		return name
+	}
+	if mod == "" {
+		mod = components[0]
 	}
 	return strings.Replace(mod, "/", "", -1) + "." + name
 }

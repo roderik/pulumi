@@ -65,14 +65,19 @@ func TestGeneratePackage(t *testing.T) {
 				"example/resource.go",
 				"example/otherResource.go",
 				"example/argFunction.go",
+				"example/pulumiTypes.go",
+				"example/doc.go",
+				"example/provider.go",
 			},
 		},
 		{
 			"Simple schema with enum types",
 			"simple-enum-schema",
 			[]string{
+				filepath.Join("plant", "doc.go"),
 				filepath.Join("plant", "pulumiTypes.go"),
 				filepath.Join("plant", "pulumiEnums.go"),
+				filepath.Join("plant", "provider.go"),
 				filepath.Join("plant", "tree", "v1", "rubberTree.go"),
 				filepath.Join("plant", "tree", "v1", "pulumiEnums.go"),
 			},
@@ -102,6 +107,7 @@ func TestGeneratePackage(t *testing.T) {
 			expectedFiles, err := test.LoadFiles(filepath.Join(testDir, tt.schemaDir), "go", tt.expectedFiles)
 			assert.NoError(t, err)
 			test.ValidateFileEquality(t, files, expectedFiles)
+			test.CheckAllFilesGenerated(t, files, expectedFiles)
 		})
 	}
 }
