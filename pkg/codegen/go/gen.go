@@ -1096,16 +1096,26 @@ func (pkg *pkgContext) genResource(w io.Writer, r *schema.Resource) error {
 	fmt.Fprintf(w, "\tTo%[1]sOutput() %[1]sOutput\n", name)
 	fmt.Fprintf(w, "\tTo%[1]sOutputWithContext(ctx context.Context) %[1]sOutput\n", name)
 	fmt.Fprintf(w, "}\n\n")
-	genInputMethods(w, name, name, name, false)
+	fmt.Fprintf(w, "type %sPtrInput interface {\n", name)
+	fmt.Fprintf(w, "\tpulumi.Input\n\n")
+	fmt.Fprintf(w, "\tTo%[1]sPtrOutput() %[1]sPtrOutput\n", name)
+	fmt.Fprintf(w, "\tTo%[1]sPtrOutputWithContext(ctx context.Context) %[1]sPtrOutput\n", name)
+	fmt.Fprintf(w, "}\n\n")
+	genInputMethods(w, name, name, name, true)
 
 	// Emit the resource output type.
 	fmt.Fprintf(w, "type %sOutput struct {\n", name)
 	fmt.Fprintf(w, "\t*pulumi.OutputState\n")
 	fmt.Fprintf(w, "}\n\n")
-	genOutputMethods(w, name, name+"Output")
+	genOutputMethods(w, name, name)
+	fmt.Fprintf(w, "type %sPtrOutput struct {\n", name)
+	fmt.Fprintf(w, "\t*pulumi.OutputState\n")
+	fmt.Fprintf(w, "}\n\n")
+	genOutputMethods(w, name+"Ptr", "*"+name)
 	fmt.Fprintf(w, "\n")
 	fmt.Fprintf(w, "func init() {\n")
 	fmt.Fprintf(w, "\tpulumi.RegisterOutputType(%sOutput{})\n", name)
+	fmt.Fprintf(w, "\tpulumi.RegisterOutputType(%sPtrOutput{})\n", name)
 	fmt.Fprintf(w, "}\n\n")
 
 	return nil
