@@ -51,6 +51,13 @@ type OtherResourceInput interface {
 	ToOtherResourceOutputWithContext(ctx context.Context) OtherResourceOutput
 }
 
+type OtherResourcePtrInput interface {
+	pulumi.Input
+
+	ToOtherResourcePtrOutput() OtherResourcePtrOutput
+	ToOtherResourcePtrOutputWithContext(ctx context.Context) OtherResourcePtrOutput
+}
+
 func (OtherResource) ElementType() reflect.Type {
 	return reflect.TypeOf((*OtherResource)(nil)).Elem()
 }
@@ -61,6 +68,14 @@ func (i OtherResource) ToOtherResourceOutput() OtherResourceOutput {
 
 func (i OtherResource) ToOtherResourceOutputWithContext(ctx context.Context) OtherResourceOutput {
 	return pulumi.ToOutputWithContext(ctx, i).(OtherResourceOutput)
+}
+
+func (i OtherResource) ToOtherResourcePtrOutput() OtherResourcePtrOutput {
+	return i.ToOtherResourcePtrOutputWithContext(context.Background())
+}
+
+func (i OtherResource) ToOtherResourcePtrOutputWithContext(ctx context.Context) OtherResourcePtrOutput {
+	return pulumi.ToOutputWithContext(ctx, i).(OtherResourcePtrOutput)
 }
 
 type OtherResourceOutput struct {
@@ -79,6 +94,23 @@ func (o OtherResourceOutput) ToOtherResourceOutputWithContext(ctx context.Contex
 	return o
 }
 
+type OtherResourcePtrOutput struct {
+	*pulumi.OutputState
+}
+
+func (OtherResourcePtrOutput) ElementType() reflect.Type {
+	return reflect.TypeOf((**OtherResource)(nil)).Elem()
+}
+
+func (o OtherResourcePtrOutput) ToOtherResourcePtrOutput() OtherResourcePtrOutput {
+	return o
+}
+
+func (o OtherResourcePtrOutput) ToOtherResourcePtrOutputWithContext(ctx context.Context) OtherResourcePtrOutput {
+	return o
+}
+
 func init() {
 	pulumi.RegisterOutputType(OtherResourceOutput{})
+	pulumi.RegisterOutputType(OtherResourcePtrOutput{})
 }
