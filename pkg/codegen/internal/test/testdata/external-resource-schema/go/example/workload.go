@@ -75,6 +75,13 @@ type WorkloadInput interface {
 	ToWorkloadOutputWithContext(ctx context.Context) WorkloadOutput
 }
 
+type WorkloadPtrInput interface {
+	pulumi.Input
+
+	ToWorkloadPtrOutput() WorkloadPtrOutput
+	ToWorkloadPtrOutputWithContext(ctx context.Context) WorkloadPtrOutput
+}
+
 func (Workload) ElementType() reflect.Type {
 	return reflect.TypeOf((*Workload)(nil)).Elem()
 }
@@ -85,6 +92,14 @@ func (i Workload) ToWorkloadOutput() WorkloadOutput {
 
 func (i Workload) ToWorkloadOutputWithContext(ctx context.Context) WorkloadOutput {
 	return pulumi.ToOutputWithContext(ctx, i).(WorkloadOutput)
+}
+
+func (i Workload) ToWorkloadPtrOutput() WorkloadPtrOutput {
+	return i.ToWorkloadPtrOutputWithContext(context.Background())
+}
+
+func (i Workload) ToWorkloadPtrOutputWithContext(ctx context.Context) WorkloadPtrOutput {
+	return pulumi.ToOutputWithContext(ctx, i).(WorkloadPtrOutput)
 }
 
 type WorkloadOutput struct {
@@ -103,6 +118,23 @@ func (o WorkloadOutput) ToWorkloadOutputWithContext(ctx context.Context) Workloa
 	return o
 }
 
+type WorkloadPtrOutput struct {
+	*pulumi.OutputState
+}
+
+func (WorkloadPtrOutput) ElementType() reflect.Type {
+	return reflect.TypeOf((**Workload)(nil)).Elem()
+}
+
+func (o WorkloadPtrOutput) ToWorkloadPtrOutput() WorkloadPtrOutput {
+	return o
+}
+
+func (o WorkloadPtrOutput) ToWorkloadPtrOutputWithContext(ctx context.Context) WorkloadPtrOutput {
+	return o
+}
+
 func init() {
 	pulumi.RegisterOutputType(WorkloadOutput{})
+	pulumi.RegisterOutputType(WorkloadPtrOutput{})
 }
