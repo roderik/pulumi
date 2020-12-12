@@ -49,7 +49,7 @@ func (i PetArgs) ToPetPtrOutput() PetPtrOutput {
 }
 
 func (i PetArgs) ToPetPtrOutputWithContext(ctx context.Context) PetPtrOutput {
-	return pulumi.ToOutputWithContext(ctx, i).(PetPtrOutput)
+	return pulumi.ToOutputWithContext(ctx, i).(PetOutput).ToPetPtrOutput()
 }
 
 // PetPtrInput is an input type that accepts PetArgs, PetPtr and PetPtrOutput values.
@@ -82,7 +82,7 @@ func (i *petPtrType) ToPetPtrOutput() PetPtrOutput {
 }
 
 func (i *petPtrType) ToPetPtrOutputWithContext(ctx context.Context) PetPtrOutput {
-	return pulumi.ToOutputWithContext(ctx, i).(PetPtrOutput)
+	return pulumi.ToOutputWithContext(ctx, i).(PetOutput).ToPetPtrOutput()
 }
 
 type PetOutput struct{ *pulumi.OutputState }

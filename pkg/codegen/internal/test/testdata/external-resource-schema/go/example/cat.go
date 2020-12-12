@@ -78,6 +78,26 @@ type CatInput interface {
 	ToCatOutputWithContext(ctx context.Context) CatOutput
 }
 
+func (*Cat) ElementType() reflect.Type {
+	return reflect.TypeOf((*Cat)(nil))
+}
+
+func (i *Cat) ToCatOutput() CatOutput {
+	return i.ToCatOutputWithContext(context.Background())
+}
+
+func (i *Cat) ToCatOutputWithContext(ctx context.Context) CatOutput {
+	return pulumi.ToOutputWithContext(ctx, i).(CatOutput)
+}
+
+func (i *Cat) ToCatPtrOutput() CatPtrOutput {
+	return i.ToCatPtrOutputWithContext(context.Background())
+}
+
+func (i *Cat) ToCatPtrOutputWithContext(ctx context.Context) CatPtrOutput {
+	return pulumi.ToOutputWithContext(ctx, i).(CatPtrOutput)
+}
+
 type CatPtrInput interface {
 	pulumi.Input
 
@@ -85,32 +105,12 @@ type CatPtrInput interface {
 	ToCatPtrOutputWithContext(ctx context.Context) CatPtrOutput
 }
 
-func (Cat) ElementType() reflect.Type {
-	return reflect.TypeOf((*Cat)(nil)).Elem()
-}
-
-func (i Cat) ToCatOutput() CatOutput {
-	return i.ToCatOutputWithContext(context.Background())
-}
-
-func (i Cat) ToCatOutputWithContext(ctx context.Context) CatOutput {
-	return pulumi.ToOutputWithContext(ctx, i).(CatOutput)
-}
-
-func (i Cat) ToCatPtrOutput() CatPtrOutput {
-	return i.ToCatPtrOutputWithContext(context.Background())
-}
-
-func (i Cat) ToCatPtrOutputWithContext(ctx context.Context) CatPtrOutput {
-	return pulumi.ToOutputWithContext(ctx, i).(CatPtrOutput)
-}
-
 type CatOutput struct {
 	*pulumi.OutputState
 }
 
 func (CatOutput) ElementType() reflect.Type {
-	return reflect.TypeOf((*CatOutput)(nil)).Elem()
+	return reflect.TypeOf((*Cat)(nil))
 }
 
 func (o CatOutput) ToCatOutput() CatOutput {
@@ -126,7 +126,7 @@ type CatPtrOutput struct {
 }
 
 func (CatPtrOutput) ElementType() reflect.Type {
-	return reflect.TypeOf((**Cat)(nil)).Elem()
+	return reflect.TypeOf((**Cat)(nil))
 }
 
 func (o CatPtrOutput) ToCatPtrOutput() CatPtrOutput {

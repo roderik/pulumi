@@ -47,6 +47,26 @@ type ProviderInput interface {
 	ToProviderOutputWithContext(ctx context.Context) ProviderOutput
 }
 
+func (*Provider) ElementType() reflect.Type {
+	return reflect.TypeOf((*Provider)(nil))
+}
+
+func (i *Provider) ToProviderOutput() ProviderOutput {
+	return i.ToProviderOutputWithContext(context.Background())
+}
+
+func (i *Provider) ToProviderOutputWithContext(ctx context.Context) ProviderOutput {
+	return pulumi.ToOutputWithContext(ctx, i).(ProviderOutput)
+}
+
+func (i *Provider) ToProviderPtrOutput() ProviderPtrOutput {
+	return i.ToProviderPtrOutputWithContext(context.Background())
+}
+
+func (i *Provider) ToProviderPtrOutputWithContext(ctx context.Context) ProviderPtrOutput {
+	return pulumi.ToOutputWithContext(ctx, i).(ProviderPtrOutput)
+}
+
 type ProviderPtrInput interface {
 	pulumi.Input
 
@@ -54,32 +74,12 @@ type ProviderPtrInput interface {
 	ToProviderPtrOutputWithContext(ctx context.Context) ProviderPtrOutput
 }
 
-func (Provider) ElementType() reflect.Type {
-	return reflect.TypeOf((*Provider)(nil)).Elem()
-}
-
-func (i Provider) ToProviderOutput() ProviderOutput {
-	return i.ToProviderOutputWithContext(context.Background())
-}
-
-func (i Provider) ToProviderOutputWithContext(ctx context.Context) ProviderOutput {
-	return pulumi.ToOutputWithContext(ctx, i).(ProviderOutput)
-}
-
-func (i Provider) ToProviderPtrOutput() ProviderPtrOutput {
-	return i.ToProviderPtrOutputWithContext(context.Background())
-}
-
-func (i Provider) ToProviderPtrOutputWithContext(ctx context.Context) ProviderPtrOutput {
-	return pulumi.ToOutputWithContext(ctx, i).(ProviderPtrOutput)
-}
-
 type ProviderOutput struct {
 	*pulumi.OutputState
 }
 
 func (ProviderOutput) ElementType() reflect.Type {
-	return reflect.TypeOf((*ProviderOutput)(nil)).Elem()
+	return reflect.TypeOf((*Provider)(nil))
 }
 
 func (o ProviderOutput) ToProviderOutput() ProviderOutput {
@@ -95,7 +95,7 @@ type ProviderPtrOutput struct {
 }
 
 func (ProviderPtrOutput) ElementType() reflect.Type {
-	return reflect.TypeOf((**Provider)(nil)).Elem()
+	return reflect.TypeOf((**Provider)(nil))
 }
 
 func (o ProviderPtrOutput) ToProviderPtrOutput() ProviderPtrOutput {

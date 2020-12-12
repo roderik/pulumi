@@ -88,6 +88,26 @@ type RubberTreeInput interface {
 	ToRubberTreeOutputWithContext(ctx context.Context) RubberTreeOutput
 }
 
+func (*RubberTree) ElementType() reflect.Type {
+	return reflect.TypeOf((*RubberTree)(nil))
+}
+
+func (i *RubberTree) ToRubberTreeOutput() RubberTreeOutput {
+	return i.ToRubberTreeOutputWithContext(context.Background())
+}
+
+func (i *RubberTree) ToRubberTreeOutputWithContext(ctx context.Context) RubberTreeOutput {
+	return pulumi.ToOutputWithContext(ctx, i).(RubberTreeOutput)
+}
+
+func (i *RubberTree) ToRubberTreePtrOutput() RubberTreePtrOutput {
+	return i.ToRubberTreePtrOutputWithContext(context.Background())
+}
+
+func (i *RubberTree) ToRubberTreePtrOutputWithContext(ctx context.Context) RubberTreePtrOutput {
+	return pulumi.ToOutputWithContext(ctx, i).(RubberTreePtrOutput)
+}
+
 type RubberTreePtrInput interface {
 	pulumi.Input
 
@@ -95,32 +115,12 @@ type RubberTreePtrInput interface {
 	ToRubberTreePtrOutputWithContext(ctx context.Context) RubberTreePtrOutput
 }
 
-func (RubberTree) ElementType() reflect.Type {
-	return reflect.TypeOf((*RubberTree)(nil)).Elem()
-}
-
-func (i RubberTree) ToRubberTreeOutput() RubberTreeOutput {
-	return i.ToRubberTreeOutputWithContext(context.Background())
-}
-
-func (i RubberTree) ToRubberTreeOutputWithContext(ctx context.Context) RubberTreeOutput {
-	return pulumi.ToOutputWithContext(ctx, i).(RubberTreeOutput)
-}
-
-func (i RubberTree) ToRubberTreePtrOutput() RubberTreePtrOutput {
-	return i.ToRubberTreePtrOutputWithContext(context.Background())
-}
-
-func (i RubberTree) ToRubberTreePtrOutputWithContext(ctx context.Context) RubberTreePtrOutput {
-	return pulumi.ToOutputWithContext(ctx, i).(RubberTreePtrOutput)
-}
-
 type RubberTreeOutput struct {
 	*pulumi.OutputState
 }
 
 func (RubberTreeOutput) ElementType() reflect.Type {
-	return reflect.TypeOf((*RubberTreeOutput)(nil)).Elem()
+	return reflect.TypeOf((*RubberTree)(nil))
 }
 
 func (o RubberTreeOutput) ToRubberTreeOutput() RubberTreeOutput {
@@ -136,7 +136,7 @@ type RubberTreePtrOutput struct {
 }
 
 func (RubberTreePtrOutput) ElementType() reflect.Type {
-	return reflect.TypeOf((**RubberTree)(nil)).Elem()
+	return reflect.TypeOf((**RubberTree)(nil))
 }
 
 func (o RubberTreePtrOutput) ToRubberTreePtrOutput() RubberTreePtrOutput {

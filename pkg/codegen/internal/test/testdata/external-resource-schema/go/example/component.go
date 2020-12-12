@@ -88,6 +88,26 @@ type ComponentInput interface {
 	ToComponentOutputWithContext(ctx context.Context) ComponentOutput
 }
 
+func (*Component) ElementType() reflect.Type {
+	return reflect.TypeOf((*Component)(nil))
+}
+
+func (i *Component) ToComponentOutput() ComponentOutput {
+	return i.ToComponentOutputWithContext(context.Background())
+}
+
+func (i *Component) ToComponentOutputWithContext(ctx context.Context) ComponentOutput {
+	return pulumi.ToOutputWithContext(ctx, i).(ComponentOutput)
+}
+
+func (i *Component) ToComponentPtrOutput() ComponentPtrOutput {
+	return i.ToComponentPtrOutputWithContext(context.Background())
+}
+
+func (i *Component) ToComponentPtrOutputWithContext(ctx context.Context) ComponentPtrOutput {
+	return pulumi.ToOutputWithContext(ctx, i).(ComponentPtrOutput)
+}
+
 type ComponentPtrInput interface {
 	pulumi.Input
 
@@ -95,32 +115,12 @@ type ComponentPtrInput interface {
 	ToComponentPtrOutputWithContext(ctx context.Context) ComponentPtrOutput
 }
 
-func (Component) ElementType() reflect.Type {
-	return reflect.TypeOf((*Component)(nil)).Elem()
-}
-
-func (i Component) ToComponentOutput() ComponentOutput {
-	return i.ToComponentOutputWithContext(context.Background())
-}
-
-func (i Component) ToComponentOutputWithContext(ctx context.Context) ComponentOutput {
-	return pulumi.ToOutputWithContext(ctx, i).(ComponentOutput)
-}
-
-func (i Component) ToComponentPtrOutput() ComponentPtrOutput {
-	return i.ToComponentPtrOutputWithContext(context.Background())
-}
-
-func (i Component) ToComponentPtrOutputWithContext(ctx context.Context) ComponentPtrOutput {
-	return pulumi.ToOutputWithContext(ctx, i).(ComponentPtrOutput)
-}
-
 type ComponentOutput struct {
 	*pulumi.OutputState
 }
 
 func (ComponentOutput) ElementType() reflect.Type {
-	return reflect.TypeOf((*ComponentOutput)(nil)).Elem()
+	return reflect.TypeOf((*Component)(nil))
 }
 
 func (o ComponentOutput) ToComponentOutput() ComponentOutput {
@@ -136,7 +136,7 @@ type ComponentPtrOutput struct {
 }
 
 func (ComponentPtrOutput) ElementType() reflect.Type {
-	return reflect.TypeOf((**Component)(nil)).Elem()
+	return reflect.TypeOf((**Component)(nil))
 }
 
 func (o ComponentPtrOutput) ToComponentPtrOutput() ComponentPtrOutput {

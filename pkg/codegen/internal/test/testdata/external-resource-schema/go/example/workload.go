@@ -75,6 +75,26 @@ type WorkloadInput interface {
 	ToWorkloadOutputWithContext(ctx context.Context) WorkloadOutput
 }
 
+func (*Workload) ElementType() reflect.Type {
+	return reflect.TypeOf((*Workload)(nil))
+}
+
+func (i *Workload) ToWorkloadOutput() WorkloadOutput {
+	return i.ToWorkloadOutputWithContext(context.Background())
+}
+
+func (i *Workload) ToWorkloadOutputWithContext(ctx context.Context) WorkloadOutput {
+	return pulumi.ToOutputWithContext(ctx, i).(WorkloadOutput)
+}
+
+func (i *Workload) ToWorkloadPtrOutput() WorkloadPtrOutput {
+	return i.ToWorkloadPtrOutputWithContext(context.Background())
+}
+
+func (i *Workload) ToWorkloadPtrOutputWithContext(ctx context.Context) WorkloadPtrOutput {
+	return pulumi.ToOutputWithContext(ctx, i).(WorkloadPtrOutput)
+}
+
 type WorkloadPtrInput interface {
 	pulumi.Input
 
@@ -82,32 +102,12 @@ type WorkloadPtrInput interface {
 	ToWorkloadPtrOutputWithContext(ctx context.Context) WorkloadPtrOutput
 }
 
-func (Workload) ElementType() reflect.Type {
-	return reflect.TypeOf((*Workload)(nil)).Elem()
-}
-
-func (i Workload) ToWorkloadOutput() WorkloadOutput {
-	return i.ToWorkloadOutputWithContext(context.Background())
-}
-
-func (i Workload) ToWorkloadOutputWithContext(ctx context.Context) WorkloadOutput {
-	return pulumi.ToOutputWithContext(ctx, i).(WorkloadOutput)
-}
-
-func (i Workload) ToWorkloadPtrOutput() WorkloadPtrOutput {
-	return i.ToWorkloadPtrOutputWithContext(context.Background())
-}
-
-func (i Workload) ToWorkloadPtrOutputWithContext(ctx context.Context) WorkloadPtrOutput {
-	return pulumi.ToOutputWithContext(ctx, i).(WorkloadPtrOutput)
-}
-
 type WorkloadOutput struct {
 	*pulumi.OutputState
 }
 
 func (WorkloadOutput) ElementType() reflect.Type {
-	return reflect.TypeOf((*WorkloadOutput)(nil)).Elem()
+	return reflect.TypeOf((*Workload)(nil))
 }
 
 func (o WorkloadOutput) ToWorkloadOutput() WorkloadOutput {
@@ -123,7 +123,7 @@ type WorkloadPtrOutput struct {
 }
 
 func (WorkloadPtrOutput) ElementType() reflect.Type {
-	return reflect.TypeOf((**Workload)(nil)).Elem()
+	return reflect.TypeOf((**Workload)(nil))
 }
 
 func (o WorkloadPtrOutput) ToWorkloadPtrOutput() WorkloadPtrOutput {

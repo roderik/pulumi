@@ -76,6 +76,26 @@ type ResourceInput interface {
 	ToResourceOutputWithContext(ctx context.Context) ResourceOutput
 }
 
+func (*Resource) ElementType() reflect.Type {
+	return reflect.TypeOf((*Resource)(nil))
+}
+
+func (i *Resource) ToResourceOutput() ResourceOutput {
+	return i.ToResourceOutputWithContext(context.Background())
+}
+
+func (i *Resource) ToResourceOutputWithContext(ctx context.Context) ResourceOutput {
+	return pulumi.ToOutputWithContext(ctx, i).(ResourceOutput)
+}
+
+func (i *Resource) ToResourcePtrOutput() ResourcePtrOutput {
+	return i.ToResourcePtrOutputWithContext(context.Background())
+}
+
+func (i *Resource) ToResourcePtrOutputWithContext(ctx context.Context) ResourcePtrOutput {
+	return pulumi.ToOutputWithContext(ctx, i).(ResourcePtrOutput)
+}
+
 type ResourcePtrInput interface {
 	pulumi.Input
 
@@ -83,32 +103,12 @@ type ResourcePtrInput interface {
 	ToResourcePtrOutputWithContext(ctx context.Context) ResourcePtrOutput
 }
 
-func (Resource) ElementType() reflect.Type {
-	return reflect.TypeOf((*Resource)(nil)).Elem()
-}
-
-func (i Resource) ToResourceOutput() ResourceOutput {
-	return i.ToResourceOutputWithContext(context.Background())
-}
-
-func (i Resource) ToResourceOutputWithContext(ctx context.Context) ResourceOutput {
-	return pulumi.ToOutputWithContext(ctx, i).(ResourceOutput)
-}
-
-func (i Resource) ToResourcePtrOutput() ResourcePtrOutput {
-	return i.ToResourcePtrOutputWithContext(context.Background())
-}
-
-func (i Resource) ToResourcePtrOutputWithContext(ctx context.Context) ResourcePtrOutput {
-	return pulumi.ToOutputWithContext(ctx, i).(ResourcePtrOutput)
-}
-
 type ResourceOutput struct {
 	*pulumi.OutputState
 }
 
 func (ResourceOutput) ElementType() reflect.Type {
-	return reflect.TypeOf((*ResourceOutput)(nil)).Elem()
+	return reflect.TypeOf((*Resource)(nil))
 }
 
 func (o ResourceOutput) ToResourceOutput() ResourceOutput {
@@ -124,7 +124,7 @@ type ResourcePtrOutput struct {
 }
 
 func (ResourcePtrOutput) ElementType() reflect.Type {
-	return reflect.TypeOf((**Resource)(nil)).Elem()
+	return reflect.TypeOf((**Resource)(nil))
 }
 
 func (o ResourcePtrOutput) ToResourcePtrOutput() ResourcePtrOutput {
