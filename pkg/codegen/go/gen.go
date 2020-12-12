@@ -192,6 +192,11 @@ func (pkg *pkgContext) tokenToResource(tok string) string {
 		panic(fmt.Errorf("pkg.pkg is nil. token %s", tok))
 	}
 
+	// Is it a provider resource?
+	if components[0] == "pulumi" && components[1] == "providers" {
+		return fmt.Sprintf("%s.Provider", components[2])
+	}
+
 	mod, name := pkg.tokenToPackage(tok), components[2]
 
 	name = Title(name)
@@ -341,6 +346,8 @@ func (pkg *pkgContext) resolveResourceType(t *schema.ResourceType) string {
 	if t.Resource != nil && pkg.pkg != nil && t.Resource.Package != pkg.pkg {
 		extPkg := t.Resource.Package
 		var goInfo GoPackageInfo
+
+		contract.AssertNoError(extPkg.ImportLanguages(map[string]schema.Language{"go": Importer}))
 		if info, ok := extPkg.Language["go"].(GoPackageInfo); ok {
 			goInfo = info
 		}
@@ -349,7 +356,11 @@ func (pkg *pkgContext) resolveResourceType(t *schema.ResourceType) string {
 			importBasePath:   goInfo.ImportBasePath,
 			pkgImportAliases: goInfo.PackageImportAliases,
 		}
-		return extPkgCtx.plainType(t, false)
+		resType := extPkgCtx.tokenToResource(t.Token)
+		if !strings.Contains(resType, ".") {
+			resType = fmt.Sprintf("%s.%s", extPkg.Name, resType)
+		}
+		return resType
 	}
 	return pkg.tokenToResource(t.Token)
 }
@@ -362,6 +373,8 @@ func (pkg *pkgContext) resolveObjectType(t *schema.ObjectType) string {
 	if t.Package != nil && pkg.pkg != nil && t.Package != pkg.pkg {
 		extPkg := t.Package
 		var goInfo GoPackageInfo
+
+		contract.AssertNoError(extPkg.ImportLanguages(map[string]schema.Language{"go": Importer}))
 		if info, ok := extPkg.Language["go"].(GoPackageInfo); ok {
 			goInfo = info
 		}
@@ -1250,20 +1263,22 @@ func (pkg *pkgContext) genTypeRegistrations(w io.Writer, types []*schema.ObjectT
 	fmt.Fprintf(w, "}\n")
 }
 
-func (pkg *pkgContext) getTypeImports(t schema.Type, recurse bool, imports stringSet, seen map[schema.Type]struct{}) {
+func (pkg *pkgContext) getTypeImports(t schema.Type, recurse bool, importsAndAliases map[string]string, seen map[schema.Type]struct{}) {
 	if _, ok := seen[t]; ok {
 		return
 	}
 	seen[t] = struct{}{}
 	switch t := t.(type) {
 	case *schema.ArrayType:
-		pkg.getTypeImports(t.ElementType, recurse, imports, seen)
+		pkg.getTypeImports(t.ElementType, recurse, importsAndAliases, seen)
 	case *schema.MapType:
-		pkg.getTypeImports(t.ElementType, recurse, imports, seen)
+		pkg.getTypeImports(t.ElementType, recurse, importsAndAliases, seen)
 	case *schema.ObjectType:
 		if t.Package != nil && pkg.pkg != nil && t.Package != pkg.pkg {
 			extPkg := t.Package
 			var goInfo GoPackageInfo
+
+			contract.AssertNoError(extPkg.ImportLanguages(map[string]schema.Language{"go": Importer}))
 			if info, ok := extPkg.Language["go"].(GoPackageInfo); ok {
 				goInfo = info
 			} else {
@@ -1277,23 +1292,25 @@ func (pkg *pkgContext) getTypeImports(t schema.Type, recurse bool, imports strin
 			}
 			mod := extPkgCtx.tokenToPackage(t.Token)
 			imp := path.Join(goInfo.ImportBasePath, mod)
-			imports.add(imp)
+			importsAndAliases[imp] = goInfo.PackageImportAliases[imp]
 			break
 		}
 		mod := pkg.tokenToPackage(t.Token)
 		if mod != pkg.mod {
-			imports.add(path.Join(pkg.importBasePath, mod))
+			importsAndAliases[path.Join(pkg.importBasePath, mod)] = ""
 		}
 
 		if recurse {
 			for _, p := range t.Properties {
-				pkg.getTypeImports(p.Type, recurse, imports, seen)
+				pkg.getTypeImports(p.Type, recurse, importsAndAliases, seen)
 			}
 		}
 	case *schema.ResourceType:
 		if t.Resource != nil && pkg.pkg != nil && t.Resource.Package != pkg.pkg {
 			extPkg := t.Resource.Package
 			var goInfo GoPackageInfo
+
+			contract.AssertNoError(extPkg.ImportLanguages(map[string]schema.Language{"go": Importer}))
 			if info, ok := extPkg.Language["go"].(GoPackageInfo); ok {
 				goInfo = info
 			} else {
@@ -1307,16 +1324,16 @@ func (pkg *pkgContext) getTypeImports(t schema.Type, recurse bool, imports strin
 			}
 			mod := extPkgCtx.tokenToPackage(t.Token)
 			imp := path.Join(goInfo.ImportBasePath, mod)
-			imports.add(imp)
+			importsAndAliases[imp] = goInfo.PackageImportAliases[imp]
 			break
 		}
 		mod := pkg.tokenToPackage(t.Token)
 		if mod != pkg.mod {
-			imports.add(path.Join(pkg.importBasePath, mod))
+			importsAndAliases[path.Join(pkg.importBasePath, mod)] = ""
 		}
 	case *schema.UnionType:
 		for _, e := range t.ElementTypes {
-			pkg.getTypeImports(e, recurse, imports, seen)
+			pkg.getTypeImports(e, recurse, importsAndAliases, seen)
 		}
 	}
 }
@@ -1330,44 +1347,44 @@ func extractImportBasePath(extPkg *schema.Package) string {
 	return fmt.Sprintf("github.com/pulumi/pulumi-%s/sdk%s/go/%s", extPkg.Name, vPath, extPkg.Name)
 }
 
-func (pkg *pkgContext) getImports(member interface{}, imports stringSet) {
+func (pkg *pkgContext) getImports(member interface{}, importsAndAliases map[string]string) {
 	seen := map[schema.Type]struct{}{}
 	switch member := member.(type) {
 	case *schema.ObjectType:
-		pkg.getTypeImports(member, true, imports, seen)
+		pkg.getTypeImports(member, true, importsAndAliases, seen)
 	case *schema.ResourceType:
-		pkg.getTypeImports(member, true, imports, seen)
+		pkg.getTypeImports(member, true, importsAndAliases, seen)
 	case *schema.Resource:
 		for _, p := range member.Properties {
-			pkg.getTypeImports(p.Type, false, imports, seen)
+			pkg.getTypeImports(p.Type, false, importsAndAliases, seen)
 		}
 		for _, p := range member.InputProperties {
-			pkg.getTypeImports(p.Type, false, imports, seen)
+			pkg.getTypeImports(p.Type, false, importsAndAliases, seen)
 
 			if p.IsRequired {
-				imports.add("github.com/pkg/errors")
+				importsAndAliases["github.com/pkg/errors"] = ""
 			}
 		}
 	case *schema.Function:
 		if member.Inputs != nil {
-			pkg.getTypeImports(member.Inputs, true, imports, seen)
+			pkg.getTypeImports(member.Inputs, true, importsAndAliases, seen)
 		}
 		if member.Outputs != nil {
-			pkg.getTypeImports(member.Outputs, true, imports, seen)
+			pkg.getTypeImports(member.Outputs, true, importsAndAliases, seen)
 		}
 	case []*schema.Property:
 		for _, p := range member {
-			pkg.getTypeImports(p.Type, false, imports, seen)
+			pkg.getTypeImports(p.Type, false, importsAndAliases, seen)
 		}
 	case *schema.EnumType: // Just need pulumi sdk, see below
 	default:
 		return
 	}
 
-	imports.add("github.com/pulumi/pulumi/sdk/v2/go/pulumi")
+	importsAndAliases["github.com/pulumi/pulumi/sdk/v2/go/pulumi"] = ""
 }
 
-func (pkg *pkgContext) genHeader(w io.Writer, goImports []string, importedPackages stringSet) {
+func (pkg *pkgContext) genHeader(w io.Writer, goImports []string, importsAndAliases map[string]string) {
 	fmt.Fprintf(w, "// *** WARNING: this file was generated by %v. ***\n", pkg.tool)
 	fmt.Fprintf(w, "// *** Do not edit by hand unless you're certain you know what you are doing! ***\n\n")
 
@@ -1381,14 +1398,14 @@ func (pkg *pkgContext) genHeader(w io.Writer, goImports []string, importedPackag
 	fmt.Fprintf(w, "package %s\n\n", pkgName)
 
 	var imports []string
-	if len(importedPackages) > 0 {
-		for k := range importedPackages {
+	if len(importsAndAliases) > 0 {
+		for k := range importsAndAliases {
 			imports = append(imports, k)
 		}
 		sort.Strings(imports)
 
 		for i, k := range imports {
-			if alias, ok := pkg.pkgImportAliases[k]; ok {
+			if alias := importsAndAliases[k]; alias != "" {
 				imports[i] = fmt.Sprintf(`%s "%s"`, alias, k)
 			}
 		}
@@ -1418,10 +1435,10 @@ func (pkg *pkgContext) genHeader(w io.Writer, goImports []string, importedPackag
 }
 
 func (pkg *pkgContext) genConfig(w io.Writer, variables []*schema.Property) error {
-	imports := newStringSet("github.com/pulumi/pulumi/sdk/v2/go/pulumi/config")
-	pkg.getImports(variables, imports)
+	importsAndAliases := map[string]string{"github.com/pulumi/pulumi/sdk/v2/go/pulumi/config": ""}
+	pkg.getImports(variables, importsAndAliases)
 
-	pkg.genHeader(w, nil, imports)
+	pkg.genHeader(w, nil, importsAndAliases)
 
 	for _, p := range variables {
 		getfunc := "Get"
@@ -1712,11 +1729,11 @@ func GeneratePackage(tool string, pkg *schema.Package) (map[string][]byte, error
 
 		// Resources
 		for _, r := range pkg.resources {
-			imports := stringSet{}
-			pkg.getImports(r, imports)
+			importsAndAliases := map[string]string{}
+			pkg.getImports(r, importsAndAliases)
 
 			buffer := &bytes.Buffer{}
-			pkg.genHeader(buffer, []string{"context", "reflect"}, imports)
+			pkg.genHeader(buffer, []string{"context", "reflect"}, importsAndAliases)
 
 			if err := pkg.genResource(buffer, r); err != nil {
 				return nil, err
@@ -1727,11 +1744,11 @@ func GeneratePackage(tool string, pkg *schema.Package) (map[string][]byte, error
 
 		// Functions
 		for _, f := range pkg.functions {
-			imports := stringSet{}
-			pkg.getImports(f, imports)
+			importsAndAliases := map[string]string{}
+			pkg.getImports(f, importsAndAliases)
 
 			buffer := &bytes.Buffer{}
-			pkg.genHeader(buffer, nil, imports)
+			pkg.genHeader(buffer, nil, importsAndAliases)
 
 			pkg.genFunction(buffer, f)
 
@@ -1740,13 +1757,13 @@ func GeneratePackage(tool string, pkg *schema.Package) (map[string][]byte, error
 
 		// Types
 		if len(pkg.types) > 0 {
-			imports := stringSet{}
+			importsAndAliases := map[string]string{}
 			for _, t := range pkg.types {
-				pkg.getImports(t, imports)
+				pkg.getImports(t, importsAndAliases)
 			}
 
 			buffer := &bytes.Buffer{}
-			pkg.genHeader(buffer, []string{"context", "reflect"}, imports)
+			pkg.genHeader(buffer, []string{"context", "reflect"}, importsAndAliases)
 
 			for _, t := range pkg.types {
 				pkg.genType(buffer, t)
@@ -1759,7 +1776,7 @@ func GeneratePackage(tool string, pkg *schema.Package) (map[string][]byte, error
 
 		// Enums
 		if len(pkg.enums) > 0 {
-			imports := stringSet{}
+			imports := map[string]string{}
 			for _, e := range pkg.enums {
 				pkg.getImports(e, imports)
 			}
@@ -1778,8 +1795,8 @@ func GeneratePackage(tool string, pkg *schema.Package) (map[string][]byte, error
 		// Utilities
 		if pkg.needsUtils {
 			buffer := &bytes.Buffer{}
-			imports := newStringSet("github.com/pulumi/pulumi/sdk/v2/go/pulumi")
-			pkg.genHeader(buffer, []string{"os", "strconv", "strings"}, imports)
+			importsAndAliases := map[string]string{"github.com/pulumi/pulumi/sdk/v2/go/pulumi": ""}
+			pkg.genHeader(buffer, []string{"os", "strconv", "strings"}, importsAndAliases)
 
 			fmt.Fprintf(buffer, "%s", utilitiesFile)
 
