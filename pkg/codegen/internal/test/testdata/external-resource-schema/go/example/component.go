@@ -11,15 +11,17 @@ import (
 	"github.com/pulumi/pulumi-aws/sdk/v3/go/aws/eks"
 	"github.com/pulumi/pulumi-kubernetes/sdk/v2/go/kubernetes"
 	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v2/go/kubernetes/meta/v1"
+	storagev1 "github.com/pulumi/pulumi-kubernetes/sdk/v2/go/kubernetes/storage/v1"
 	"github.com/pulumi/pulumi/sdk/v2/go/pulumi"
 )
 
 type Component struct {
 	pulumi.CustomResourceState
 
-	Provider      kubernetes.ProviderOutput        `pulumi:"provider"`
-	SecurityGroup ec2.SecurityGroupOutput          `pulumi:"securityGroup"`
-	Selector      eks.FargateProfileSelectorOutput `pulumi:"selector"`
+	Provider       kubernetes.ProviderOutput           `pulumi:"provider"`
+	SecurityGroup  ec2.SecurityGroupOutput             `pulumi:"securityGroup"`
+	Selector       eks.FargateProfileSelectorPtrOutput `pulumi:"selector"`
+	StorageClasses storagev1.StorageClassMapOutput     `pulumi:"storageClasses"`
 }
 
 // NewComponent registers a new resource with the given unique name, arguments, and options.
@@ -51,15 +53,17 @@ func GetComponent(ctx *pulumi.Context,
 
 // Input properties used for looking up and filtering Component resources.
 type componentState struct {
-	Provider      *kubernetes.Provider        `pulumi:"provider"`
-	SecurityGroup *ec2.SecurityGroup          `pulumi:"securityGroup"`
-	Selector      *eks.FargateProfileSelector `pulumi:"selector"`
+	Provider       *kubernetes.Provider              `pulumi:"provider"`
+	SecurityGroup  *ec2.SecurityGroup                `pulumi:"securityGroup"`
+	Selector       *eks.FargateProfileSelector       `pulumi:"selector"`
+	StorageClasses map[string]storagev1.StorageClass `pulumi:"storageClasses"`
 }
 
 type ComponentState struct {
-	Provider      kubernetes.ProviderInput
-	SecurityGroup ec2.SecurityGroupInput
-	Selector      eks.FargateProfileSelectorPtrInput
+	Provider       kubernetes.ProviderInput
+	SecurityGroup  ec2.SecurityGroupInput
+	Selector       eks.FargateProfileSelectorPtrInput
+	StorageClasses storagev1.StorageClassMapInput
 }
 
 func (ComponentState) ElementType() reflect.Type {

@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"go/format"
 	"io"
+	"os"
 	"path"
 	"reflect"
 	"regexp"
@@ -355,6 +356,7 @@ func (pkg *pkgContext) resolveResourceType(t *schema.ResourceType) string {
 			pkg:              extPkg,
 			importBasePath:   goInfo.ImportBasePath,
 			pkgImportAliases: goInfo.PackageImportAliases,
+			modToPkg:         goInfo.ModuleToPackage,
 		}
 		resType := extPkgCtx.tokenToResource(t.Token)
 		if !strings.Contains(resType, ".") {
@@ -382,6 +384,7 @@ func (pkg *pkgContext) resolveObjectType(t *schema.ObjectType) string {
 			pkg:              extPkg,
 			importBasePath:   goInfo.ImportBasePath,
 			pkgImportAliases: goInfo.PackageImportAliases,
+			modToPkg:         goInfo.ModuleToPackage,
 		}
 		return extPkgCtx.plainType(t, false)
 	}
@@ -1289,6 +1292,7 @@ func (pkg *pkgContext) getTypeImports(t schema.Type, recurse bool, importsAndAli
 				pkg:              extPkg,
 				importBasePath:   goInfo.ImportBasePath,
 				pkgImportAliases: goInfo.PackageImportAliases,
+				modToPkg:         goInfo.ModuleToPackage,
 			}
 			mod := extPkgCtx.tokenToPackage(t.Token)
 			imp := path.Join(goInfo.ImportBasePath, mod)
@@ -1321,6 +1325,7 @@ func (pkg *pkgContext) getTypeImports(t schema.Type, recurse bool, importsAndAli
 				pkg:              extPkg,
 				importBasePath:   goInfo.ImportBasePath,
 				pkgImportAliases: goInfo.PackageImportAliases,
+				modToPkg:         goInfo.ModuleToPackage,
 			}
 			mod := extPkgCtx.tokenToPackage(t.Token)
 			imp := path.Join(goInfo.ImportBasePath, mod)
@@ -1691,7 +1696,8 @@ func GeneratePackage(tool string, pkg *schema.Package) (map[string][]byte, error
 		// Run Go formatter on the code before saving to disk
 		formattedSource, err := format.Source([]byte(contents))
 		if err != nil {
-			panic(errors.Wrapf(err, "invalid Go source code:\n\n%s: %s", relPath, contents))
+			fmt.Fprintf(os.Stderr, "Invalid content:\n%s\n%s\n", relPath, contents)
+			panic(errors.Wrapf(err, "invalid Go source code:\n\n%s\n", relPath))
 		}
 
 		files[relPath] = formattedSource
