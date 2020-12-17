@@ -2,7 +2,21 @@ CHANGELOG
 =========
 
 ## HEAD (Unreleased)
-_(none)_
+
+- Fix a bug in the core engine that could cause resources references to marshal improperly
+  during preview.
+  [#5960](https://github.com/pulumi/pulumi/pull/5960)
+
+- [sdk/dotnet] Add collection initializers for smooth support of Union<T, U> as element type
+  [#5938](https://github.com/pulumi/pulumi/pull/5938)
+
+## 2.15.6 (2020-12-12)
+
+- Fix a bug in the Go SDK that could result in dropped resource dependencies.
+  [#5930](https://github.com/pulumi/pulumi/pull/5930)
+  
+- Temporarily disable resource ref feature.
+  [#5932](https://github.com/pulumi/pulumi/pull/5932)
 
 ## 2.15.5 (2020-12-11)
 

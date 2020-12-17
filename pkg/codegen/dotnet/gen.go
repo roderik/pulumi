@@ -187,7 +187,9 @@ func (mod *modContext) tokenToNamespace(tok string, qualifier string) string {
 	pkg, nsName := "Pulumi."+namespaceName(mod.namespaces, components[0]), mod.pkg.TokenToModule(tok)
 
 	if mod.isK8sCompatMode() {
-		return pkg + ".Types." + qualifier + "." + namespaceName(mod.namespaces, nsName)
+		if qualifier != "" {
+			return pkg + ".Types." + qualifier + "." + namespaceName(mod.namespaces, nsName)
+		}
 	}
 
 	typ := pkg
@@ -1039,7 +1041,7 @@ func (mod *modContext) genEnum(w io.Writer, enum *schema.EnumType) error {
 			e.Name = fmt.Sprintf("%v", e.Value)
 		}
 
-		safeName, err := makeSafeEnumName(e.Name)
+		safeName, err := makeSafeEnumName(e.Name, enumName)
 		if err != nil {
 			return err
 		}
