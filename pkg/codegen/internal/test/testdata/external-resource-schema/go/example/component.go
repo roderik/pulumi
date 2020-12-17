@@ -8,7 +8,6 @@ import (
 	"reflect"
 
 	"github.com/pulumi/pulumi-aws/sdk/v3/go/aws/ec2"
-	"github.com/pulumi/pulumi-aws/sdk/v3/go/aws/eks"
 	"github.com/pulumi/pulumi-kubernetes/sdk/v2/go/kubernetes"
 	metav1 "github.com/pulumi/pulumi-kubernetes/sdk/v2/go/kubernetes/meta/v1"
 	storagev1 "github.com/pulumi/pulumi-kubernetes/sdk/v2/go/kubernetes/storage/v1"
@@ -18,10 +17,9 @@ import (
 type Component struct {
 	pulumi.CustomResourceState
 
-	Provider       kubernetes.ProviderOutput           `pulumi:"provider"`
-	SecurityGroup  ec2.SecurityGroupOutput             `pulumi:"securityGroup"`
-	Selector       eks.FargateProfileSelectorPtrOutput `pulumi:"selector"`
-	StorageClasses storagev1.StorageClassMapOutput     `pulumi:"storageClasses"`
+	Provider       kubernetes.ProviderOutput       `pulumi:"provider"`
+	SecurityGroup  ec2.SecurityGroupOutput         `pulumi:"securityGroup"`
+	StorageClasses storagev1.StorageClassMapOutput `pulumi:"storageClasses"`
 }
 
 // NewComponent registers a new resource with the given unique name, arguments, and options.
@@ -55,14 +53,12 @@ func GetComponent(ctx *pulumi.Context,
 type componentState struct {
 	Provider       *kubernetes.Provider              `pulumi:"provider"`
 	SecurityGroup  *ec2.SecurityGroup                `pulumi:"securityGroup"`
-	Selector       *eks.FargateProfileSelector       `pulumi:"selector"`
 	StorageClasses map[string]storagev1.StorageClass `pulumi:"storageClasses"`
 }
 
 type ComponentState struct {
 	Provider       kubernetes.ProviderInput
 	SecurityGroup  ec2.SecurityGroupInput
-	Selector       eks.FargateProfileSelectorPtrInput
 	StorageClasses storagev1.StorageClassMapInput
 }
 
@@ -71,14 +67,12 @@ func (ComponentState) ElementType() reflect.Type {
 }
 
 type componentArgs struct {
-	Metadata *metav1.ObjectMeta          `pulumi:"metadata"`
-	Selector *eks.FargateProfileSelector `pulumi:"selector"`
+	Metadata *metav1.ObjectMeta `pulumi:"metadata"`
 }
 
 // The set of arguments for constructing a Component resource.
 type ComponentArgs struct {
 	Metadata metav1.ObjectMetaPtrInput
-	Selector eks.FargateProfileSelectorPtrInput
 }
 
 func (ComponentArgs) ElementType() reflect.Type {
@@ -119,6 +113,70 @@ type ComponentPtrInput interface {
 	ToComponentPtrOutputWithContext(ctx context.Context) ComponentPtrOutput
 }
 
+type componentPtrType ComponentArgs
+
+func (*componentPtrType) ElementType() reflect.Type {
+	return reflect.TypeOf((**Component)(nil))
+}
+
+func (i *componentPtrType) ToComponentPtrOutput() ComponentPtrOutput {
+	return i.ToComponentPtrOutputWithContext(context.Background())
+}
+
+func (i *componentPtrType) ToComponentPtrOutputWithContext(ctx context.Context) ComponentPtrOutput {
+	return pulumi.ToOutputWithContext(ctx, i).(ComponentOutput).ToComponentPtrOutput()
+}
+
+// ComponentArrayInput is an input type that accepts ComponentArray and ComponentArrayOutput values.
+// You can construct a concrete instance of `ComponentArrayInput` via:
+//
+//          ComponentArray{ ComponentArgs{...} }
+type ComponentArrayInput interface {
+	pulumi.Input
+
+	ToComponentArrayOutput() ComponentArrayOutput
+	ToComponentArrayOutputWithContext(context.Context) ComponentArrayOutput
+}
+
+type ComponentArray []ComponentInput
+
+func (ComponentArray) ElementType() reflect.Type {
+	return reflect.TypeOf((*[]Component)(nil))
+}
+
+func (i ComponentArray) ToComponentArrayOutput() ComponentArrayOutput {
+	return i.ToComponentArrayOutputWithContext(context.Background())
+}
+
+func (i ComponentArray) ToComponentArrayOutputWithContext(ctx context.Context) ComponentArrayOutput {
+	return pulumi.ToOutputWithContext(ctx, i).(ComponentArrayOutput)
+}
+
+// ComponentMapInput is an input type that accepts ComponentMap and ComponentMapOutput values.
+// You can construct a concrete instance of `ComponentMapInput` via:
+//
+//          ComponentMap{ "key": ComponentArgs{...} }
+type ComponentMapInput interface {
+	pulumi.Input
+
+	ToComponentMapOutput() ComponentMapOutput
+	ToComponentMapOutputWithContext(context.Context) ComponentMapOutput
+}
+
+type ComponentMap map[string]ComponentInput
+
+func (ComponentMap) ElementType() reflect.Type {
+	return reflect.TypeOf((*map[string]Component)(nil))
+}
+
+func (i ComponentMap) ToComponentMapOutput() ComponentMapOutput {
+	return i.ToComponentMapOutputWithContext(context.Background())
+}
+
+func (i ComponentMap) ToComponentMapOutputWithContext(ctx context.Context) ComponentMapOutput {
+	return pulumi.ToOutputWithContext(ctx, i).(ComponentMapOutput)
+}
+
 type ComponentOutput struct {
 	*pulumi.OutputState
 }
@@ -133,6 +191,16 @@ func (o ComponentOutput) ToComponentOutput() ComponentOutput {
 
 func (o ComponentOutput) ToComponentOutputWithContext(ctx context.Context) ComponentOutput {
 	return o
+}
+
+func (o ComponentOutput) ToComponentPtrOutput() ComponentPtrOutput {
+	return o.ToComponentPtrOutputWithContext(context.Background())
+}
+
+func (o ComponentOutput) ToComponentPtrOutputWithContext(ctx context.Context) ComponentPtrOutput {
+	return o.ApplyT(func(v Component) *Component {
+		return &v
+	}).(ComponentPtrOutput)
 }
 
 type ComponentPtrOutput struct {
@@ -151,7 +219,49 @@ func (o ComponentPtrOutput) ToComponentPtrOutputWithContext(ctx context.Context)
 	return o
 }
 
+type ComponentArrayOutput struct{ *pulumi.OutputState }
+
+func (ComponentArrayOutput) ElementType() reflect.Type {
+	return reflect.TypeOf((*[]Component)(nil))
+}
+
+func (o ComponentArrayOutput) ToComponentArrayOutput() ComponentArrayOutput {
+	return o
+}
+
+func (o ComponentArrayOutput) ToComponentArrayOutputWithContext(ctx context.Context) ComponentArrayOutput {
+	return o
+}
+
+func (o ComponentArrayOutput) Index(i pulumi.IntInput) ComponentOutput {
+	return pulumi.All(o, i).ApplyT(func(vs []interface{}) Component {
+		return vs[0].([]Component)[vs[1].(int)]
+	}).(ComponentOutput)
+}
+
+type ComponentMapOutput struct{ *pulumi.OutputState }
+
+func (ComponentMapOutput) ElementType() reflect.Type {
+	return reflect.TypeOf((*map[string]Component)(nil))
+}
+
+func (o ComponentMapOutput) ToComponentMapOutput() ComponentMapOutput {
+	return o
+}
+
+func (o ComponentMapOutput) ToComponentMapOutputWithContext(ctx context.Context) ComponentMapOutput {
+	return o
+}
+
+func (o ComponentMapOutput) MapIndex(k pulumi.StringInput) ComponentOutput {
+	return pulumi.All(o, k).ApplyT(func(vs []interface{}) Component {
+		return vs[0].(map[string]Component)[vs[1].(string)]
+	}).(ComponentOutput)
+}
+
 func init() {
 	pulumi.RegisterOutputType(ComponentOutput{})
 	pulumi.RegisterOutputType(ComponentPtrOutput{})
+	pulumi.RegisterOutputType(ComponentArrayOutput{})
+	pulumi.RegisterOutputType(ComponentMapOutput{})
 }

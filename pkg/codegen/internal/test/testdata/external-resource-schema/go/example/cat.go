@@ -105,6 +105,70 @@ type CatPtrInput interface {
 	ToCatPtrOutputWithContext(ctx context.Context) CatPtrOutput
 }
 
+type catPtrType CatArgs
+
+func (*catPtrType) ElementType() reflect.Type {
+	return reflect.TypeOf((**Cat)(nil))
+}
+
+func (i *catPtrType) ToCatPtrOutput() CatPtrOutput {
+	return i.ToCatPtrOutputWithContext(context.Background())
+}
+
+func (i *catPtrType) ToCatPtrOutputWithContext(ctx context.Context) CatPtrOutput {
+	return pulumi.ToOutputWithContext(ctx, i).(CatOutput).ToCatPtrOutput()
+}
+
+// CatArrayInput is an input type that accepts CatArray and CatArrayOutput values.
+// You can construct a concrete instance of `CatArrayInput` via:
+//
+//          CatArray{ CatArgs{...} }
+type CatArrayInput interface {
+	pulumi.Input
+
+	ToCatArrayOutput() CatArrayOutput
+	ToCatArrayOutputWithContext(context.Context) CatArrayOutput
+}
+
+type CatArray []CatInput
+
+func (CatArray) ElementType() reflect.Type {
+	return reflect.TypeOf((*[]Cat)(nil))
+}
+
+func (i CatArray) ToCatArrayOutput() CatArrayOutput {
+	return i.ToCatArrayOutputWithContext(context.Background())
+}
+
+func (i CatArray) ToCatArrayOutputWithContext(ctx context.Context) CatArrayOutput {
+	return pulumi.ToOutputWithContext(ctx, i).(CatArrayOutput)
+}
+
+// CatMapInput is an input type that accepts CatMap and CatMapOutput values.
+// You can construct a concrete instance of `CatMapInput` via:
+//
+//          CatMap{ "key": CatArgs{...} }
+type CatMapInput interface {
+	pulumi.Input
+
+	ToCatMapOutput() CatMapOutput
+	ToCatMapOutputWithContext(context.Context) CatMapOutput
+}
+
+type CatMap map[string]CatInput
+
+func (CatMap) ElementType() reflect.Type {
+	return reflect.TypeOf((*map[string]Cat)(nil))
+}
+
+func (i CatMap) ToCatMapOutput() CatMapOutput {
+	return i.ToCatMapOutputWithContext(context.Background())
+}
+
+func (i CatMap) ToCatMapOutputWithContext(ctx context.Context) CatMapOutput {
+	return pulumi.ToOutputWithContext(ctx, i).(CatMapOutput)
+}
+
 type CatOutput struct {
 	*pulumi.OutputState
 }
@@ -119,6 +183,16 @@ func (o CatOutput) ToCatOutput() CatOutput {
 
 func (o CatOutput) ToCatOutputWithContext(ctx context.Context) CatOutput {
 	return o
+}
+
+func (o CatOutput) ToCatPtrOutput() CatPtrOutput {
+	return o.ToCatPtrOutputWithContext(context.Background())
+}
+
+func (o CatOutput) ToCatPtrOutputWithContext(ctx context.Context) CatPtrOutput {
+	return o.ApplyT(func(v Cat) *Cat {
+		return &v
+	}).(CatPtrOutput)
 }
 
 type CatPtrOutput struct {
@@ -137,7 +211,49 @@ func (o CatPtrOutput) ToCatPtrOutputWithContext(ctx context.Context) CatPtrOutpu
 	return o
 }
 
+type CatArrayOutput struct{ *pulumi.OutputState }
+
+func (CatArrayOutput) ElementType() reflect.Type {
+	return reflect.TypeOf((*[]Cat)(nil))
+}
+
+func (o CatArrayOutput) ToCatArrayOutput() CatArrayOutput {
+	return o
+}
+
+func (o CatArrayOutput) ToCatArrayOutputWithContext(ctx context.Context) CatArrayOutput {
+	return o
+}
+
+func (o CatArrayOutput) Index(i pulumi.IntInput) CatOutput {
+	return pulumi.All(o, i).ApplyT(func(vs []interface{}) Cat {
+		return vs[0].([]Cat)[vs[1].(int)]
+	}).(CatOutput)
+}
+
+type CatMapOutput struct{ *pulumi.OutputState }
+
+func (CatMapOutput) ElementType() reflect.Type {
+	return reflect.TypeOf((*map[string]Cat)(nil))
+}
+
+func (o CatMapOutput) ToCatMapOutput() CatMapOutput {
+	return o
+}
+
+func (o CatMapOutput) ToCatMapOutputWithContext(ctx context.Context) CatMapOutput {
+	return o
+}
+
+func (o CatMapOutput) MapIndex(k pulumi.StringInput) CatOutput {
+	return pulumi.All(o, k).ApplyT(func(vs []interface{}) Cat {
+		return vs[0].(map[string]Cat)[vs[1].(string)]
+	}).(CatOutput)
+}
+
 func init() {
 	pulumi.RegisterOutputType(CatOutput{})
 	pulumi.RegisterOutputType(CatPtrOutput{})
+	pulumi.RegisterOutputType(CatArrayOutput{})
+	pulumi.RegisterOutputType(CatMapOutput{})
 }
